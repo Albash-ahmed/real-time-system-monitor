@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time System Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">🌙</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="header-title">
+                <span class="icon">📊</span>
+                Real-Time System Monitor
+            </h1>
+            <p class="header-subtitle">Operating System Resource Monitoring & Analysis</p>
+        </div>
+    </header>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- System Info Card -->
+        <div class="system-info-card">
+            <div class="info-item">
+                <span class="info-label">Platform:</span>
+                <span id="platform" class="info-value">Loading...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Uptime:</span>
+                <span id="uptime" class="info-value">Loading...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Last Updated:</span>
+                <span id="last-updated" class="info-value">Never</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Refresh Interval:</span>
+                <select id="refresh-interval" onchange="updateRefreshInterval()">
+                    <option value="1000">1 second</option>
+                    <option value="2000" selected>2 seconds</option>
+                    <option value="5000">5 seconds</option>
+                    <option value="10000">10 seconds</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="manualRefresh()">🔄 Refresh Now</button>
+        </div>
+
+        <!-- Resource Cards Grid -->
+        <div class="resource-grid">
+            <!-- CPU Card -->
+            <div class="resource-card">
+                <div class="card-header">
+                    <h2 class="card-title">💻 CPU Usage</h2>
+                    <span class="os-concept-badge" title="CPU Scheduling & Utilization">OS Concept</span>
+                </div>
+                <div class="card-body">
+                    <div class="metric-display">
+                        <div class="metric-value" id="cpu-percent">0%</div>
+                        <div class="metric-label">Overall Usage</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="cpu-progress" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span>Physical Cores:</span>
+                            <span id="cpu-cores">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Logical Cores:</span>
+                            <span id="cpu-logical">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Frequency:</span>
+                            <span id="cpu-freq">- MHz</span>
+                        </div>
+                    </div>
+                    <div class="os-concept-explanation">
+                        <strong>CPU Scheduling:</strong> Measures processor utilization and time-sharing across processes
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Card -->
+            <div class="resource-card">
+                <div class="card-header">
+                    <h2 class="card-title">🧠 Memory Usage</h2>
+                    <span class="os-concept-badge" title="Memory Management">OS Concept</span>
+                </div>
+                <div class="card-body">
+                    <div class="metric-display">
+                        <div class="metric-value" id="memory-percent">0%</div>
+                        <div class="metric-label">Memory Used</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="memory-progress" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span>Total:</span>
+                            <span id="memory-total">- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Used:</span>
+                            <span id="memory-used">- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Available:</span>
+                            <span id="memory-available">- GB</span>
+                        </div>
+                    </div>
+                    <div class="os-concept-explanation">
+                        <strong>Memory Management:</strong> Virtual memory allocation and physical RAM utilization
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disk Card -->
+            <div class="resource-card">
+                <div class="card-header">
+                    <h2 class="card-title">💾 Disk Usage</h2>
+                    <span class="os-concept-badge" title="File System Management">OS Concept</span>
+                </div>
+                <div class="card-body">
+                    <div class="metric-display">
+                        <div class="metric-value" id="disk-percent">0%</div>
+                        <div class="metric-label">Disk Used</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="disk-progress" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span>Total:</span>
+                            <span id="disk-total">- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Used:</span>
+                            <span id="disk-used">- GB</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Free:</span>
+                            <span id="disk-free">- GB</span>
+                        </div>
+                    </div>
+                    <div class="os-concept-explanation">
+                        <strong>File System:</strong> Storage allocation and disk I/O operations
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Card -->
+            <div class="resource-card">
+                <div class="card-header">
+                    <h2 class="card-title">🌐 Network Activity</h2>
+                    <span class="os-concept-badge" title="Network I/O">OS Concept</span>
+                </div>
+                <div class="card-body">
+                    <div class="metric-display-split">
+                        <div class="metric-half">
+                            <div class="metric-value-small" id="network-sent">0 MB</div>
+                            <div class="metric-label">Sent</div>
+                        </div>
+                        <div class="metric-half">
+                            <div class="metric-value-small" id="network-recv">0 MB</div>
+                            <div class="metric-label">Received</div>
+                        </div>
+                    </div>
+                    <div class="metric-details">
+                        <div class="detail-item">
+                            <span>Packets Sent:</span>
+                            <span id="packets-sent">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span>Packets Received:</span>
+                            <span id="packets-recv">-</span>
+                        </div>
+                    </div>
+                    <div class="os-concept-explanation">
+                        <strong>Network I/O:</strong> Data transmission and inter-process communication
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Graphs -->
+        <div class="graph-container">
+            <div class="graph-card">
+                <h3 class="graph-title">CPU Usage Trend (Last 60 updates)</h3>
+                <canvas id="cpu-chart"></canvas>
+            </div>
+            <div class="graph-card">
+                <h3 class="graph-title">Memory Usage Trend (Last 60 updates)</h3>
+                <canvas id="memory-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Per-Core CPU Usage -->
+        <div class="section-card">
+            <h2 class="section-title">🔧 Per-Core CPU Usage</h2>
+            <div id="core-usage-container" class="core-grid"></div>
+        </div>
+
+        <!-- Process Management -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">⚙️ Process Management</h2>
+                <div class="process-controls">
+                    <input type="text" id="process-search" placeholder="Search by name or PID..." class="search-input">
+                    <select id="sort-by" onchange="sortProcesses()">
+                        <option value="cpu">Sort by CPU</option>
+                        <option value="memory">Sort by Memory</option>
+                        <option value="name">Sort by Name</option>
+                        <option value="pid">Sort by PID</option>
+                    </select>
+                </div>
+            </div>
+            <div class="os-concept-explanation">
+                <strong>Process Management:</strong> The OS scheduler allocates CPU time to processes. 
+                High CPU% indicates heavy computation. High Memory% shows large working set size. 
+                Process termination triggers resource cleanup and state transitions.
+            </div>
+            <div class="table-container">
+                <table class="process-table">
+                    <thead>
+                        <tr>
+                            <th>PID</th>
+                            <th>Process Name</th>
+                            <th>CPU %</th>
+                            <th>Memory %</th>
+                            <th>Status</th>
+                            <th>Threads</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="process-tbody"></tbody>
+                </table>
+            </div>
+            <div class="process-summary">
+                <span>Showing: <strong id="process-count">0</strong> processes</span>
+            </div>
+        </div>
+
+        <!-- Threshold Configuration -->
+        <div class="section-card">
+            <h2 class="section-title">⚠️ Alert Thresholds</h2>
+            <div class="threshold-controls">
+                <div class="threshold-item">
+                    <label for="cpu-threshold">CPU Threshold (%):</label>
+                    <input type="number" id="cpu-threshold" value="80" min="1" max="100">
+                </div>
+                <div class="threshold-item">
+                    <label for="memory-threshold">Memory Threshold (%):</label>
+                    <input type="number" id="memory-threshold" value="85" min="1" max="100">
+                </div>
+                <div class="threshold-item">
+                    <label for="disk-threshold">Disk Threshold (%):</label>
+                    <input type="number" id="disk-threshold" value="90" min="1" max="100">
+                </div>
+                <button class="btn btn-primary" onclick="updateThresholds()">Update Thresholds</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Real-Time System Monitor | Demonstrating OS Concepts: Process Management, Memory Management, CPU Scheduling, File Systems</p>
+            <p>Built with Python (Flask + psutil) and vanilla JavaScript</p>
+        </div>
+    </footer>
+
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
